@@ -26,52 +26,61 @@ public class PaymentController {
     private DiscoveryClient discoveryClient;
 
     @PostMapping(value = "/payment/create")
-    public CommonResult create(@RequestBody Payment payment)
-    {
+    public CommonResult create(@RequestBody Payment payment) {
         int result = paymentService.create(payment);
-        log.info("***插入结果："+result);
+        log.info("***插入结果：" + result);
 
-        if (result>0)
-        {
-            return new CommonResult(200,"插入数据库成功,serverPort:"+serverPort,result);
-        }
-        else
-        {
-            return new CommonResult(444,"插入数据库失败",null);
+        if (result > 0) {
+            return new CommonResult(200, "插入数据库成功,serverPort:" + serverPort, result);
+        } else {
+            return new CommonResult(444, "插入数据库失败", null);
         }
     }
 
     @GetMapping(value = "/payment/get/{id}")
-    public CommonResult<Payment> getPaymentById(@PathVariable("id") Long id)
-    {
+    public CommonResult<Payment> getPaymentById(@PathVariable("id") Long id) {
         Payment payment = paymentService.getPaymentById(id);
-        log.info("***查询结果："+payment);
+        log.info("***查询结果：" + payment);
 
-        int age = 10/2;
-        if (payment!=null)
-        {
-            return new CommonResult(200,"查询成功，这是结果！,serverPort:"+serverPort,payment);
-        }
-        else
-        {
-            return new CommonResult(444,"没有对应记录，查询ID："+id,null);
+        int age = 10 / 2;
+        if (payment != null) {
+            return new CommonResult(200, "查询成功，这是结果！,serverPort:" + serverPort, payment);
+        } else {
+            return new CommonResult(444, "没有对应记录，查询ID：" + id, null);
         }
     }
 
     @GetMapping(value = "/payment/discovery")
-    public Object discovery()
-    {
+    public Object discovery() {
         List<String> servicesList = discoveryClient.getServices();
-        for (String element:servicesList) {
-           log.info("** element:"+element);
+        for (String element : servicesList) {
+            log.info("** element:" + element);
         }
 
         List<ServiceInstance> instances = discoveryClient.getInstances("CLOUD-PAYMENT-SERVICE");
-        for (ServiceInstance instance:instances) {
+        for (ServiceInstance instance : instances) {
 
-            log.info(instance.getServiceId()+"\t"+instance.getPort()+"\t"+instance.getUri());
+            log.info(instance.getServiceId() + "\t" + instance.getPort() + "\t" + instance.getUri());
 
         }
-        return  this.discoveryClient;
+        return this.discoveryClient;
+    }
+
+    @GetMapping(value = "/payment/lb")
+    public String getPaymentLB() {
+        return serverPort;
+    }
+
+
+    @GetMapping(value = "/payment/feign/timeout")
+    public String getPaymentTimeOut() {
+        try {
+            Thread.sleep(3000);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return serverPort;
     }
 }
+
+
